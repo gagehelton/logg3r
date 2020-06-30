@@ -50,7 +50,7 @@ class Log:
             logger = logging.getLogger(self.name)
             logger.setLevel(self.set_level())
             try:
-                formatter = kwargs['formatter']
+                formatter = logging.Formatter(kwargs['formatter'])
             except KeyError:
                 formatter = logging.Formatter('{} | %(levelname)s | %(message)s '.format(datetime.datetime.utcnow().replace(microsecond=0)))
             except Exception as e:
@@ -125,26 +125,26 @@ class Log:
         #debug = green
         if(level == 1):
             self.logger.debug(message)
-            if(self.level == 1): printer("DEBUG | " + self.name + " " + message,color="green")
+            if(self.level == 1): self.printer("DEBUG | " + self.name + " " + message,color="green")
         #info = cyan
         elif(level == 2):
             self.logger.info(message)
-            if(self.level <= 2): printer("INFO | " + self.name + " " + message,color="cyan")
+            if(self.level <= 2): self.printer("INFO | " + self.name + " " + message,color="cyan")
         #warning = yellow
         elif(level == 3):
             self.logger.warning(message)
-            if(self.level <= 3): printer("WARNING | " + self.name + " " + message,color="yellow")
+            if(self.level <= 3): self.printer("WARNING | " + self.name + " " + message,color="yellow")
         #error = magenta
         elif(level == 4):
             self.logger.error(message)
-            if(self.level <= 4): printer("ERROR | " + self.name + " " + message,color="magenta")
+            if(self.level <= 4): self.printer("ERROR | " + self.name + " " + message,color="magenta")
         #critical = red
         elif(level == 5):
             self.logger.critical(message)
-            if(self.level <= 5): printer("CRITICAL | " + self.name + " " + message,color="red")
+            if(self.level <= 5): self.printer("CRITICAL | " + self.name + " " + message,color="red")
 
 def test():
-    a = Log(name="test_log",level=4,log_path="./test/",debug=False)
+    a = Log(name="test_log",level=4,log_path="./test/",debug=False)#,formatter=formatter_test)
     a.log("this is my message from 1",1)
     a.log("this is my message from 1",2)
     a.log("this is my message from 1",3)
@@ -157,5 +157,3 @@ if __name__ == '__main__':
     for color in prnt.colors:
         printer("{}".format(color),color=color)
     test()
-
-    
