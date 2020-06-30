@@ -3,7 +3,7 @@ from logging.handlers import TimedRotatingFileHandler
 import datetime
 import os
 import sys
-        
+
 class color_print():
     def __init__(self):
         self.colors = {
@@ -27,14 +27,19 @@ class color_print():
             header = "============================================================"
             print(self.colors['red'] + header + "\nCOLOR PRINT ERROR!\n{} | {}\n".format(type(e).__name__.replace("'",""),e.args) + header + self.end)
 
-class log:
+class Log:
     def __init__(self,**kwargs):
         self.printer = color_print().p
-        required = {"log_path":str,"name":str,"level":[str,int]}
+        required = {"log_path":str,"name":str,"level":int}
         if(self.parse_kwargs(required,kwargs)):
             self.log_path = kwargs['log_path']
             self.name = kwargs['name']
             self.level = kwargs['level']
+            
+            try:
+                self.debug = kwargs['debug']
+            except KeyError:
+                self.debug = False
             
             if(not self.log_path[-1] == "/"):
                 self.log_path += "/"
@@ -44,7 +49,6 @@ class log:
 
             logger = logging.getLogger(self.name)
             logger.setLevel(self.set_level())
-            
             try:
                 formatter = kwargs['formatter']
             except KeyError:
@@ -55,30 +59,25 @@ class log:
             filename = self.log_path+self.name+".log"
 
             fh = TimedRotatingFileHandler(filename,when='d',interval=30,backupCount=1,encoding=None,delay=False,utc=True,atTime=datetime.time(4, 0, 0))
-            fh.setLevel(self.set_level())
             fh.setFormatter(formatter)
             logger.addHandler(fh)
-    
+            
             self.logger = logger
 
     def set_level(self):
-        try:
-            level = self.level.lower()
-        except TypeError:
-            pass
-        if(level == "debug" or level == 1):
+        if(self.level == 1):
             return logging.DEBUG
-        elif(level == "info" or level == 2):
+        elif(self.level == 2):
             return logging.INFO
-        elif(level == "warning" or level == 3):
+        elif(self.level == 3):
             return logging.WARNING
-        elif(level == "error" or level == 4):
+        elif(self.level == 4):
             return logging.ERROR
-        elif(level == "critical" or level == 5):
+        elif(self.level == 5):
             return logging.CRITICAL
         else:
             return logging.DEBUG
-    
+
     def check_path(self,path):
         try:
             x = path.split("/")
@@ -112,69 +111,51 @@ class log:
                         incorrect_type.append(key)
                 elif(not isinstance(kwargs[key],val)):
                     incorrect_type.append(key)
-                else:
-                    return False
             except KeyError:
                 missing.append(key)
-
+            except Exception as e:
+                self.printer('PARSE_KWARGS: {} | {}'.format(type(e).__name__,e.args),color="red")
         if(missing or incorrect_type):
             self.printer('missing = {} | incorrect type = {}'.format(missing,incorrect_type),color="red")
+            return False
         else:
             return True
-              
+
     def log(self,message,level):
         #debug = green
         if(level == 1):
             self.logger.debug(message)
-            if(debug): printer("DEBUG | " + self.name + " " + message,color="green")
+            if(self.level == 1): printer("DEBUG | " + self.name + " " + message,color="green")
         #info = cyan
         elif(level == 2):
             self.logger.info(message)
-            printer("INFO | " + self.name + " " + message,color="cyan")
+            if(self.level <= 2): printer("INFO | " + self.name + " " + message,color="cyan")
         #warning = yellow
         elif(level == 3):
             self.logger.warning(message)
-            printer("WARNING | " + self.name + " " + message,color="yellow")
+            if(self.level <= 3): printer("WARNING | " + self.name + " " + message,color="yellow")
         #error = magenta
         elif(level == 4):
             self.logger.error(message)
-            printer("ERROR | " + self.name + " " + message,color="magenta")
+            if(self.level <= 4): printer("ERROR | " + self.name + " " + message,color="magenta")
         #critical = red
         elif(level == 5):
             self.logger.critical(message)
-            printer("CRITICAL | " + self.name + " " + message,color="red")
+            if(self.level <= 5): printer("CRITICAL | " + self.name + " " + message,color="red")
 
 def test():
-    a = logger(name="testLog")
+    a = Log(name="test_log",level=4,log_path="./test/",debug=False)
     a.log("this is my message from 1",1)
     a.log("this is my message from 1",2)
     a.log("this is my message from 1",3)
     a.log("this is my message from 1",4)
     a.log("this is my message from 1",5)
-    time.sleep(2)
-    a.log("this is my message from 2",1)
-    a.log("this is my message from 2",2)
-    a.log("this is my message from 2",3)
-    a.log("this is my message from 2",4)
-    a.log("this is my message from 2",5)
-    time.sleep(2)
-    a.log("this is my message from 3",1)
-    a.log("this is my message from 3",2)
-    a.log("this is my message from 3",3)
-    a.log("this is my message from 3",4)
-    a.log("this is my message from 3",5)
-    time.sleep(2)
-    a.log("this is my message from 4",1)
-    a.log("this is my message from 4",2)
-    a.log("this is my message from 4",3)
-    a.log("this is my message from 4",4)
-    a.log("this is my message from 4",5)
 
 if __name__ == '__main__':
     prnt = color_print()
     printer = color_print().p
     for color in prnt.colors:
         printer("{}".format(color),color=color)
-    x = log(log_path="./hello/world/test/",name="test")
+    test()
 
     
