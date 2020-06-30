@@ -35,12 +35,7 @@ class Log:
             self.log_path = kwargs['log_path']
             self.name = kwargs['name']
             self.level = kwargs['level']
-            
-            try:
-                self.debug = kwargs['debug']
-            except KeyError:
-                self.debug = False
-            
+
             if(not self.log_path[-1] == "/"):
                 self.log_path += "/"
             if(not self.check_path(self.log_path)):
@@ -57,7 +52,7 @@ class Log:
                 self.printer("FORMATTER ERROR | {} | {}".format(type(e).__name__,e.args))
 
             filename = self.log_path+self.name+".log"
-
+        
             fh = TimedRotatingFileHandler(filename,when='d',interval=30,backupCount=1,encoding=None,delay=False,utc=True,atTime=datetime.time(4, 0, 0))
             fh.setFormatter(formatter)
             logger.addHandler(fh)
@@ -144,7 +139,7 @@ class Log:
             if(self.level <= 5): self.printer("CRITICAL | " + self.name + " " + message,color="red")
 
 def test():
-    a = Log(name="test_log",level=4,log_path="./test/",debug=False)#,formatter=formatter_test)
+    a = Log(name="test_log",level=4,log_path="./test/")#,formatter=formatter_test)
     a.log("this is my message from 1",1)
     a.log("this is my message from 1",2)
     a.log("this is my message from 1",3)
