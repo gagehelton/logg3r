@@ -23,10 +23,14 @@ from logg3r import Log
 #rotation=filename,when='d',interval=30,backupCount=1,encoding=None,delay=False,utc=True,atTime=datetime.time(4, 0, 0)
 
 logger = Log(log_path="./path/to/logs/",	#REQUIRED: sets the path of the log file
-			name="test_log",				#REQUIRED: sets the name of the log file
-			level=1							#REQUIRED: sets log level to be stored in file and printed to console
-			#,formatter=formatter,			#OPTIONAL: defaults to above format, any valid logger format is accepted
-			#rotation=rotation				#OPTIONAL: defaults to 30 days of retention with (1) log overflow file (log.1)
+			#REQUIRED: sets the name of the log file
+			name="test_log",				
+			#REQUIRED: sets log level to be stored in file and printed to console
+			level=1	
+			#OPTIONAL: defaults to above format, any valid logger format is accepted
+			#,formatter=formatter,
+			#OPTIONAL: defaults to 30 days of retention with (1) log overflow file (log.1)
+			#rotation=rotation
 			)				
 
 logger.log("test DEBUG message",1)
