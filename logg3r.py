@@ -36,11 +36,17 @@ class Log:
             self.name = kwargs['name']
             self.level = kwargs['level']
 
-            if(not self.log_path[-1] == "/"):
-                self.log_path += "/"
-            if(not self.check_path(self.log_path)):
-                self.printer("CHECK_PATH: Failed to create desired log directory, defaulting to local directory",color="red")
-                self.log_path = "./"
+            try:
+                self.create_path = kwargs['create_path']
+            except KeyEror:
+                self.create_path = True
+
+            if(self.create_path):
+                if(not self.log_path[-1] == "/"):
+                    self.log_path += "/"
+                if(not self.check_path(self.log_path)):
+                    self.printer("CHECK_PATH: Failed to create desired log directory, defaulting to local directory",color="red")
+                    self.log_path = "./"
 
             logger = logging.getLogger(self.name)
             logger.setLevel(self.set_level())

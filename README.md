@@ -30,7 +30,9 @@ logger = Log(log_path="./path/to/logs/",	#REQUIRED: sets the path of the log fil
 			#OPTIONAL: defaults to above format, any valid logger format is accepted
 			#,formatter=formatter,
 			#OPTIONAL: defaults to 30 days of retention with (1) log overflow file (log.1)
-			#rotation=rotation
+			#rotation=rotation,
+			#OPTIONAL: elect to NOT create log path like if using /var/log on linux)
+			#create_path=False
 			)				
 
 logger.log("test DEBUG message",1)
