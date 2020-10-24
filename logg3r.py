@@ -38,7 +38,7 @@ class Log:
 
             try:
                 self.create_path = kwargs['create_path']
-            except KeyEror:
+            except KeyError:
                 self.create_path = True
 
             if(self.create_path):
