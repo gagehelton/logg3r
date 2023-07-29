@@ -4,7 +4,7 @@ with open("./README.md","r")as f:
     long_description = f.read()
 
 setup(name='logg3r',
-        version="2.0",
+        version="2.0.0",
         description='Simple python log helper',
         author='Gage Helton',
         author_email='gagehelton@gmail.com',
