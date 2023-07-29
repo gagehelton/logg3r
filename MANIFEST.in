@@ -4,4 +4,4 @@ include LICENSE
 recursive-include build *.py
 recursive-include dist *.gz
 recursive-include dist *.whl
-recursive-include w3mo *.pyc
+recursive-include logg3r *.pyc
