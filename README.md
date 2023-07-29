@@ -1,46 +1,137 @@
-# Overview
 ## Description
-* Logging can be a little daunting. This makes things a little easier.
+* Setting up logging sucks, this makes it easier
+
 ## Features
 * Simple logger set up
-* Automatically print log levels to terminal in color for easier debugging
-* Promotes logging DURING development, not after! Reduce your tech debt.
+* Creates log directory and filename as described in [`Log` initialization](#use)
+* Prints all log entries to the terminal in **color** for easier debugging
+* Promotes logging **during** development, not after. Reduce your tech debt.
 
-# Log Levels
-* 1 = DEBUG (green)
-* 2 = INFO (cyan)
-* 3 = WARNING (yellow)
-* 4 = ERROR (magenta)
-* 5 = CRITICAL (red)
-
-# Syntax
+# Use
 ```python
 from logg3r import Log
 
-#initialize logger
-#OPTIONAL! this initializes the file handler format, it defaults to a simple TIME | LEVEL | MESSAGE format
-#formatter='{} | %(levelname)s | %(message)s '.format(datetime.datetime.utcnow().replace(microsecond=0))
-#rotation=filename,when='d',interval=30,backupCount=1,encoding=None,delay=False,utc=True,atTime=datetime.time(4, 0, 0)
+logger = Log(log_path="/var/log", name="test_log", level=1)				
 
-logger = Log(log_path="./path/to/logs/",	#REQUIRED: sets the path of the log file
-			#REQUIRED: sets the name of the log file
-			name="test_log",				
-			#REQUIRED: sets log level to be stored in file and printed to console
-			level=1	
-			#OPTIONAL: defaults to above format, any valid logger format is accepted
-			#,formatter=formatter,
-			#OPTIONAL: defaults to 30 days of retention with (1) log overflow file (log.1)
-			#rotation=rotation,
-			#OPTIONAL: elect to NOT create log path like if using /var/log on linux)
-			#create_path=False
-			)				
+logger.debug("test message")
+logger.info("test message")
+logger.warning("test message")
+logger.error("test message")
+logger.critical("test message")
+```
+### Log File Example `test_log.log`
+```
+2023-07-29 03:13:27 | DEBUG | test message
+2023-07-29 03:13:27 | INFO | test message
+2023-07-29 03:13:27 | WARNING | test message
+2023-07-29 03:13:27 | ERROR | test message
+2023-07-29 03:13:27 | CRITICAL | test message
+```
 
-logger.log("test DEBUG message",1)
-logger.log("test INFO message",2)
-logger.log("test WARNING message",3)
-logger.log("test ERROR message",4)
-logger.log("test CRITICAL message",5)
+### Terminal Example
+![](./assets/messages.PNG)
+
+
+# Initialization Keyword Arguments
+## Required
+### `log_path` (string)
+* If the path does not exist (and `create_path` is not `False`) **logg3r** will create the directory
+
+### `name` (string)
+* Sets the name of your log file - file will present as "filename.log" in your log directory
+
+### `level` (integer)
+* See [log levels](#log-levels)
+* Sets minimum level of log message that will be stored in the log file (all log function calls print to terminal)
+
+## Optional
+### `print_filename` (bool)
+```python
+from logg3r import Log
+
+Logger = Log(log_path="/var/log",
+			name="test_log",
+			level=1,
+			print_filename=True)
+```
+* Defaults to `False`
+* If enabled, the filename will print in the first section of the log message in the terminal - the filename will not be written to the log file
+
+### `formatter` (string)
+```python
+from logg3r import Log
+fmt='{} | %(levelname)s | %(message)s '.format(datetime.datetime.utcnow().replace(microsecond=0))
+
+Logger = Log(log_path="/var/log",
+			name="test_log",
+			level=1,
+			formatter=fmt)
+```
+* The formatter can be any string you like
+  * `%(levelname)s` is **required** and corresponds to the [log level](#log-levels)
+  * `%(message)s` is **required** and is the message passed when calling any of the log functions
+  * In the example above the date and time are represented at `{}` and formatted with `.format(datetime.datetime.utcnow().replace(microsecond=0))`
+  * Any other string elements can be added to the formatter
+
+### `rotation` (tuple)
+```python
+from logg3r import Log
+rotation_args=filename,when='d',interval=30,backupCount=1,encoding=None,delay=False,utc=True,atTime=datetime.time(4, 0, 0)
+
+Logger = Log(log_path="/var/log",
+			name="test_log",
+			level=1,
+			rotation=rotation_args)
+```
+* See [Python Logging TimedRotatingFileHandler](https://docs.python.org/3.8/library/logging.handlers.html#timedrotatingfilehandler)
+* Defaults to 30 days of retention with (1) log overflow file (log.1)
+
+### `create_path` (bool)
+* Defaults to `True`
+* If set to `False` initializing **logg3r** will not create a new log directory, but will put the file in the directory passed to `log_path`
+
+# Log Levels
+* `1` = DEBUG (green)
+* `2` = INFO (cyan)
+* `3` = WARNING (yellow)
+* `4` = ERROR (magenta)
+* `5` = CRITICAL (red)
+
+# `logg3r.Log` Functions
+## `.debug`
+* Creates [debug level](#log-levels) log message entry to log file
+* Prints message in color to terminal
+```python
+logger.debug("log message")
+```
+## `.info`
+* Creates [info level](#log-levels) log message entry to log file
+* Prints message in color to terminal
+```python
+logger.info("log message")
+```
+
+## `.warning`
+* Creates [warning level](#log-levels) log message entry to log file
+* Prints message in color to terminal
+```python
+logger.warning("log message")
+```
+
+## `.error`
+* Creates [error level](#log-levels) log message entry to log file
+* Prints message in color to terminal
+```python
+logger.error("log message")
+```
+
+## `.critical`
+* Creates [critical level](#log-levels) log message entry to log file
+* Prints message in color to terminal
+```python
+logger.critical("log message")
 ```
 
 # References
 * https://docs.python.org/3.8/library/logging.handlers.html#timedrotatingfilehandler
+* https://docs.python.org/3.8/library/logging.html

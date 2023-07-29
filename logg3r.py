@@ -1,8 +1,9 @@
+import os
+import sys
 import logging
 from logging.handlers import TimedRotatingFileHandler
 import datetime
-import os
-import sys
+from inspect import currentframe,getframeinfo
 
 class color_print():
     def __init__(self):
@@ -16,7 +17,7 @@ class color_print():
         }
         self.end = '\033[0m'
 
-    def p(self,message,**kwargs):
+    def print(self,message,**kwargs):
         try:
             color = self.colors[kwargs['color'].lower()]
         except:
@@ -26,15 +27,32 @@ class color_print():
         except Exception as e:
             header = "============================================================"
             print(self.colors['red'] + header + "\nCOLOR PRINT ERROR!\n{} | {}\n".format(type(e).__name__.replace("'",""),e.args) + header + self.end)
+    
+    def debug(self,message):
+        self.print(message,color="green")
+    def info(self,message):
+        self.print(message,color="cyan")
+    def warning(self,message):
+        self.print(message,color="yellow")
+    def error(self,message):
+        self.print(message,color="magenta")
+    def critical(self,message):
+        self.print(message,color="red")
 
 class Log:
     def __init__(self,**kwargs):
-        self.printer = color_print().p
+        self.printer = color_print()#.p
         required = {"log_path":str,"name":str,"level":int}
         if(self.parse_kwargs(required,kwargs)):
             self.log_path = kwargs['log_path']
             self.name = kwargs['name']
             self.level = kwargs['level']
+            try:
+                self.print_filename = kwargs['print_filename']
+            except Exception as e:
+                self.print_filename = False
+            if(self.print_filename): self.prefix = self.name + " "
+            else: self.prefix = ""
 
             try:
                 self.create_path = kwargs['create_path']
@@ -45,7 +63,7 @@ class Log:
                 if(not self.log_path[-1] == "/"):
                     self.log_path += "/"
                 if(not self.check_path(self.log_path)):
-                    self.printer("CHECK_PATH: Failed to create desired log directory, defaulting to local directory",color="red")
+                    self.printer.critical("CHECK_PATH: Failed to create desired log directory, defaulting to local directory")
                     self.log_path = "./"
 
             logger = logging.getLogger(self.name)
@@ -55,7 +73,7 @@ class Log:
             except KeyError:
                 formatter = logging.Formatter('{} | %(levelname)s | %(message)s '.format(datetime.datetime.utcnow().replace(microsecond=0)))
             except Exception as e:
-                self.printer("FORMATTER ERROR | {} | {}".format(type(e).__name__,e.args))
+                self.printer.critical("FORMATTER ERROR | {} | {}".format(type(e).__name__,e.args))
 
             filename = self.log_path+self.name+".log"
         
@@ -94,7 +112,7 @@ class Log:
                     if(not os.path.exists(full_path)):
                         os.mkdir(full_path)
         except Exception as e:
-            self.printer("CHECK_PATH: {} | {}".format(type(e).__name__,e.args),color="red")
+            self.printer.critical("CHECK_PATH: {} | {}".format(type(e).__name__,e.args))
             return False
         return True
 
@@ -115,46 +133,33 @@ class Log:
             except KeyError:
                 missing.append(key)
             except Exception as e:
-                self.printer('PARSE_KWARGS: {} | {}'.format(type(e).__name__,e.args),color="red")
+                self.printer.critical('PARSE_KWARGS: {} | {}'.format(type(e).__name__,e.args))
         if(missing or incorrect_type):
-            self.printer('missing = {} | incorrect type = {}'.format(missing,incorrect_type),color="red")
+            self.printer.critical('missing = {} | incorrect type = {}'.format(missing,incorrect_type))
             return False
         else:
             return True
 
-    def log(self,message,level):
-        #debug = green
-        if(level == 1):
-            self.logger.debug(message)
-            if(self.level == 1): self.printer("DEBUG | " + self.name + " " + message,color="green")
-        #info = cyan
-        elif(level == 2):
-            self.logger.info(message)
-            if(self.level <= 2): self.printer("INFO | " + self.name + " " + message,color="cyan")
-        #warning = yellow
-        elif(level == 3):
-            self.logger.warning(message)
-            if(self.level <= 3): self.printer("WARNING | " + self.name + " " + message,color="yellow")
-        #error = magenta
-        elif(level == 4):
-            self.logger.error(message)
-            if(self.level <= 4): self.printer("ERROR | " + self.name + " " + message,color="magenta")
-        #critical = red
-        elif(level == 5):
-            self.logger.critical(message)
-            if(self.level <= 5): self.printer("CRITICAL | " + self.name + " " + message,color="red")
+    def debug(self,message):
+        self.logger.debug(message)
+        self.printer.debug("DEBUG----| " + self.prefix + message)
 
-def test():
-    a = Log(name="test_log",level=4,log_path="./test/")#,formatter=formatter_test)
-    a.log("this is my message from 1",1)
-    a.log("this is my message from 1",2)
-    a.log("this is my message from 1",3)
-    a.log("this is my message from 1",4)
-    a.log("this is my message from 1",5)
+    def info(self,message):
+        self.logger.info(message)
+        self.printer.info("INFO-----| " + self.prefix + message)
+    
+    def warning(self,message):
+        self.logger.warning(message)
+        self.printer.warning("WARNING--| " + self.prefix + message)
+    
+    def error(self,message):
+        self.logger.error(message)
+        self.printer.error("ERROR----| " + self.prefix + message)
+    
+    def critical(self,message):
+        self.logger.critical(message)
+        self.printer.critical("CRITICAL-| " + self.prefix + message)
 
-if __name__ == '__main__':
-    prnt = color_print()
-    printer = color_print().p
-    for color in prnt.colors:
-        printer("{}".format(color),color=color)
-    test()
+    def line(self): #get line number for logging
+        cf = currentframe()
+        return str(cf.f_back.f_lineno)+" "
