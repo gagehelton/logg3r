@@ -51,7 +51,7 @@ class Log:
                 self.print_filename = kwargs['print_filename']
             except Exception as e:
                 self.print_filename = False
-            if(self.print_filename): self.prefix = self.name + " "
+            if(self.print_filename): self.prefix = self.name + " | "
             else: self.prefix = ""
 
             try:
