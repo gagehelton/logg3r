@@ -71,7 +71,7 @@ class Log:
             try:
                 formatter = logging.Formatter(kwargs['formatter'])
             except KeyError:
-                formatter = logging.Formatter('{} | %(levelname)s | %(message)s '.format(datetime.datetime.utcnow().replace(microsecond=0)))
+                formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s ')
             except Exception as e:
                 self.printer.critical("FORMATTER ERROR | {} | {}".format(type(e).__name__,e.args))
 
